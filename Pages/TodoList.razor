@@ -1,0 +1,154 @@
+﻿@page "/todolist"
+@using Blazored.Toast.Services;
+@using Microsoft.JSInterop
+@using System.Text.Json;
+@inject IJSRuntime JSRuntime
+@using Blazored.Toast
+@inject IToastService ToastService
+
+<h3>TODO List</h3>
+
+<div>
+    <input type="text" @bind="newTaskTitle" placeholder="Task Title" />
+    <input type="text" @bind="newTaskDescription" placeholder="Task Description" />
+    <input type="text" @bind="newTaskDueDate" placeholder="Due Date" />
+    <button @onclick="AddTask">Add Task</button>
+</div>
+
+<div>
+    <label>Filter Tasks:</label>
+    <input type="radio" id="allTasks" name="filterOption" value="all" checked />
+    <label for="allTasks">All</label>
+
+    <input type="radio" id="completedTasks" name="filterOption" value="completed" />
+    <label for="completedTasks">Completed</label>
+
+    <input type="radio" id="incompleteTasks" name="filterOption" value="incomplete" />
+    <label for="incompleteTasks">Incomplete</label>
+</div>
+
+
+<ul>
+    @foreach (var task in FilteredTasks)
+    {
+        <li class="todo-item">
+            <input type="checkbox" @bind="task.IsCompleted" />
+            <span class="@GetCompletedTaskStyle(task.IsCompleted)">@task.Title</span>
+            <span class="task-description">@task.Description</span>
+            <span class="task-due-date">@task.DueDate</span>
+            <button class="delete-button" @onclick="() => DeleteTask(task.Id)">Delete</button>
+        </li>
+    }
+
+</ul>
+
+@code {
+    private List<TodoTask> tasks = new List<TodoTask>
+    {
+        new TodoTask { Id = 1, Title = "Sample Task 1", IsCompleted = false, DueDate = "2023-07-30" },
+        new TodoTask { Id = 2, Title = "Sample Task 2", IsCompleted = true, DueDate = "2023-08-10" }
+    };
+
+    private string newTaskTitle;
+    private string newTaskDescription;
+    private string newTaskDueDate;
+    private string selectedFilter = "all";
+
+    private string GetCompletedTaskStyle(bool isCompleted)
+    {
+        return isCompleted ? "completed-task" : string.Empty;
+    }
+
+    private void AddTask()
+    {
+        if (string.IsNullOrWhiteSpace(newTaskTitle))
+        {
+            // Show an error message to the user
+            ToastService.ShowError("Task title is required.");
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(newTaskTitle))
+        {
+            tasks.Add(new TodoTask
+                {
+                    Id = tasks.Count + 1,
+                    Title = newTaskTitle,
+                    Description = newTaskDescription,
+                    DueDate = newTaskDueDate,
+                    IsCompleted = false
+                });
+            newTaskTitle = string.Empty;
+            newTaskDescription = string.Empty;
+            newTaskDueDate = string.Empty;
+            SaveTasksToLocalStorage();
+        }
+        
+    }
+
+    private void DeleteTask(int taskId)
+    {
+        tasks.RemoveAll(task => task.Id == taskId);
+        SaveTasksToLocalStorage();
+    }
+
+    private async Task OnFilterChanged(ChangeEventArgs e)
+    {
+        selectedFilter = e.Value.ToString();
+        tasks = await GetTasksFromLocalStorage() ?? new List<TodoTask>();
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        tasks = await GetTasksFromLocalStorage() ?? tasks;
+    }
+
+    private async Task SaveTasksToLocalStorage()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "tasks", JsonSerializer.Serialize(tasks));
+        }
+        catch (Exception ex)
+        {
+            // Handle the exception here (e.g., log, show error message, etc.)
+            Console.WriteLine($"Error saving tasks to Local Storage: {ex.Message}");
+            // Display an error message to the user
+            ToastService.ShowError("An error occurred while saving tasks. Please try again later.");
+        }
+    }
+
+
+    private async Task<List<TodoTask>> GetTasksFromLocalStorage()
+    {
+        var json = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "tasks");
+        if (json != null)
+        {
+            return JsonSerializer.Deserialize<List<TodoTask>>(json);
+        }
+        return null;
+    }
+
+
+    private List<TodoTask> FilteredTasks
+    {
+        get
+        {
+            switch (selectedFilter)
+            {
+                case "completed":
+                    return tasks.Where(task => task.IsCompleted).ToList();
+                case "incomplete":
+                    return tasks.Where(task => !task.IsCompleted).ToList();
+                default:
+                    return tasks;
+            }
+        }
+    }
+
+    private void ToggleTaskCompletion(TodoTask task)
+    {
+        SaveTasksToLocalStorage();
+    }
+}

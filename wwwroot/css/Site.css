@@ -1,0 +1,114 @@
+﻿.todo-list-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+}
+
+.todo-list-container h3 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.todo-list-filters {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.filter-option {
+    margin: 0 10px;
+}
+
+    .filter-option label {
+        margin-left: 5px;
+    }
+
+.todo-list-add-task {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+    .todo-list-add-task input[type="text"],
+    .todo-list-add-task button {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    .todo-list-add-task input[type="text"] {
+        flex: 1;
+        margin-right: 10px;
+    }
+
+    .todo-list-add-task button {
+        background-color: #2ecc71;
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+        .todo-list-add-task button:hover {
+            background-color: #27ae60;
+        }
+
+.todo-list {
+    list-style: none;
+    padding: 0;
+}
+
+.todo-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+    .todo-item .task-title {
+        flex: 1;
+        padding: 0 10px;
+    }
+
+    .todo-item .task-description {
+        flex: 2;
+        padding: 0 10px;
+    }
+
+    .todo-item .task-due-date {
+        flex: 1;
+        padding: 0 10px;
+    }
+
+    .todo-item .delete-button {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+        .todo-item .delete-button:hover {
+            background-color: #c0392b;
+        }
+
+.task-title {
+    font-weight: bold;
+}
+
+.completed-task {
+    text-decoration: line-through;
+}
+
